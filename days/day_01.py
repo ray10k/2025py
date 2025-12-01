@@ -26,7 +26,21 @@ def star_one(data:IType) -> str:
     return str(zero_count)
 
 def star_two(data:IType) -> str:
-    pass
+    zero_count = 0
+    pointing_at = 50
+    for turn in data:
+        start_zero = pointing_at != 0
+        pointing_at += turn # rotate the dial.
+        if pointing_at == 0:
+            zero_count += 1
+        elif pointing_at >= 100:
+            zero_count += pointing_at // 100
+        elif pointing_at < 0:
+            zero_count += pointing_at // -100 + start_zero
+        pointing_at %= 100
+        print(pointing_at, zero_count)
+
+    return str(zero_count)
 
 if __name__ == "__main__":
     from pathlib import Path
