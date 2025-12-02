@@ -1,4 +1,5 @@
 from dataclasses import dataclass;
+from math import ceil
 
 @dataclass
 class InputItem:
@@ -30,6 +31,25 @@ def is_repeated(value:int) -> bool:
     halfway = len(str_value) // 2
     return str_value[0:halfway] == str_value[halfway:]
 
+def varilength_repeated(value:int) -> bool:
+    """Checks if the given number matches the conditions for star two.
+
+    Args:
+        value (int): A number that may be "invalid"
+
+    Returns:
+        bool: True if the number is "invalid", False otherwise.
+    """
+    str_value = str(value)
+    #No *actually* easy case this time. Could check if the length is a prime number,
+    # but 111 should still return False.
+    largest_chunk = len(str_value) // 2
+    for i in range(1,largest_chunk+1):
+        chunk = str_value[0:i]
+        if str_value.count(chunk) * len(chunk) == len(str_value):
+            return True
+    return False
+
 def parse_input(input_content:str) -> IType:
     retval = list()
     for input_range in input_content.split(","):
@@ -46,7 +66,12 @@ def star_one(data:IType) -> str:
     return str(retval)
 
 def star_two(data:IType) -> str:
-    pass
+    retval = 0
+    for data_range in data:
+        for id_to_check in data_range.into_range():
+            if varilength_repeated(id_to_check):
+                retval += id_to_check
+    return str(retval)
 
 if __name__ == "__main__":
     from pathlib import Path
