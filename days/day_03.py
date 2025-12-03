@@ -31,7 +31,23 @@ def star_one(data:IType) -> str:
     return str(retval)
 
 def star_two(data:IType) -> str:
-    pass
+    retval = 0
+    for battery_bank in data:
+        jolts = 0
+        offset_l = 0
+        offset_r = len(battery_bank.batteries) - 11
+        for _ in range(12):
+            #print(jolts,offset_l,offset_r)
+            #step 1: find which digit is the highest in the unchecked segment.
+            best_battery = max(battery_bank.batteries[offset_l:offset_r])
+            #step 2: find the first occurrence of that digit, and update the offsets.
+            offset_l = battery_bank.batteries.index(best_battery,offset_l,offset_r+1) + 1
+            offset_r += 1
+            #step 3: recalculate jolts.
+            jolts = (jolts * 10) + best_battery
+        #print(jolts,offset_l,offset_r,"\n")
+        retval += jolts
+    return str(retval)
 
 if __name__ == "__main__":
     from pathlib import Path
