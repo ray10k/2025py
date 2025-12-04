@@ -1,20 +1,71 @@
 from dataclasses import dataclass;
 
-@dataclass
+@dataclass(frozen=True,slots=True)
 class InputItem:
     """Representation of one 'unit' of input-data. May represent as little
     as a single character from input, as much as the entire file, or anywhere
     inbetween."""
-    a: str
+    x:int
+    y:int
+    
+    def __add__(self,other):
+        return InputItem(self.x + other.x, self.y+other.y)
 
-IType = list[InputItem]
+IType = tuple[set[InputItem],int,int]
 """The "full" input-data. One input.txt file should parse into one IType"""
 
+NEIGHBOURS = [InputItem(-1,-1),InputItem(-1,0),InputItem(-1,1),
+              InputItem(0,-1),               InputItem(0,1),
+              InputItem(1,-1),InputItem(1,0),InputItem(1,1)]
+
+def show_map(data:IType):
+    map_data, width, height = data
+    
+    print(f"{width=}; {height=}")
+    for y in range(height):
+        for x in range(width):
+            if InputItem(x,y) in map_data:
+                print("@",end="")
+            else:
+                print(" ",end="")
+        print("")
+
 def parse_input(input_content:str) -> IType:
-    return list()
+    retval = set()
+    
+    width = 0
+    height = 0
+    
+    for y,row in enumerate(input_content.splitlines()):
+        for x,column in enumerate(row):
+            if column == "@":
+                retval.add(InputItem(x,y))
+        width = max(width,len(row))
+        height += 1
+    
+    return retval, width, height
 
 def star_one(data:IType) -> str:
-    pass
+    map_data = data[0]
+    
+    show_map(data)
+    found = set()
+    
+    retval = 0
+    
+    for here in map_data:
+        free_spaces = 0
+        for neighbour in NEIGHBOURS:
+            offset = here + neighbour
+            if offset not in map_data:
+                free_spaces += 1
+                
+        if free_spaces > 4:
+            found.add(here)
+            retval += 1
+    show_map((found, data[1],data[2]))
+                
+    return str(retval)
 
 def star_two(data:IType) -> str:
     pass
