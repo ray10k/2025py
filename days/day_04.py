@@ -63,12 +63,33 @@ def star_one(data:IType) -> str:
         if free_spaces > 4:
             found.add(here)
             retval += 1
-    show_map((found, data[1],data[2]))
                 
     return str(retval)
 
 def star_two(data:IType) -> str:
-    pass
+    map_data = data[0]
+    
+    found = set()
+    
+    retval = 0
+    
+    while True:
+        found.clear()
+        for here in map_data:
+            free_spaces = 0
+            for neighbour in NEIGHBOURS:
+                offset = here + neighbour
+                if offset not in map_data:
+                    free_spaces += 1
+                    
+            if free_spaces > 4:
+                found.add(here)
+                retval += 1
+        map_data.difference_update(found)
+        if not found:
+            break
+                
+    return str(retval)
 
 if __name__ == "__main__":
     from pathlib import Path
