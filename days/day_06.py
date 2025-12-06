@@ -21,10 +21,16 @@ def parse_input(input_content:str) -> IType:
     
     #Well, that's a first for me. Turns out that star 2 is a *parsing* challenge.
     grid_2 = list()
+    curr_challenge = list()
     
     for x in range(column_len):
         v_num = "".join(lines[y][x] for y in range(len(lines)-1))
-        
+        if v_num.strip() == "":
+            grid_2.append(list(x for x in curr_challenge)) #Tripped over Python's reference
+            curr_challenge.clear() #semantics. Better copy the list!
+        else:
+            curr_challenge.append(int(v_num.strip()))
+    grid_2.append(curr_challenge)
     
     for operation in lines[-1].strip():
         if operation not in "*+":
@@ -36,7 +42,6 @@ def parse_input(input_content:str) -> IType:
 def star_one(data:IType) -> str:
     grid, _, operations = data
     results:list[int] = list(int(not op) for op in operations) #Multiply columns need to start at 1, add columns at 0.
-
     for row in grid:
         for x, column in enumerate(row):
             if operations[x]:
@@ -47,7 +52,14 @@ def star_one(data:IType) -> str:
 
 def star_two(data:IType) -> str:
     _, grid, operations = data
-    return star_one((grid, None, operations))
+    results:list[int] = list(int(not op) for op in operations) #Multiply columns need to start at 1, add columns at 0.
+    for x,row in enumerate(grid):
+        for column in row:
+            if operations[x]:
+                results[x] += column
+            else:
+                results[x] *= column
+    return str(sum(results))
 
 if __name__ == "__main__":
     from pathlib import Path
