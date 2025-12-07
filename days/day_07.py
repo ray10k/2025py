@@ -29,8 +29,6 @@ def parse_input(input_content:str) -> IType:
                 splitters.add(Splitter(y,x))
     return starting_column, splitters, len(lines)
 
-def render_map(start:int, splits:set[Splitter], beams:set[Splitter]):
-    pass
 
 def star_one(data:IType) -> str:
     beams = set()
@@ -52,7 +50,23 @@ def star_one(data:IType) -> str:
     return str(len(retval))
 
 def star_two(data:IType) -> str:
-    pass
+    start_col, splitters, height = data
+    
+    # Approach: let the numbers "trickle down."
+    beam_path:dict[Splitter,int] = dict()
+    beam_path[Splitter(0,start_col)] = 1
+    for y in range(height-1):
+        to_check = list(filter(lambda b:b.row == y,beam_path.keys()))
+        for beam in to_check:
+            next_beam = beam.down()
+            if next_beam in splitters:
+                left, right = next_beam.sides()
+                beam_path[left] = beam_path.get(left,0) + beam_path[beam]
+                beam_path[right] = beam_path.get(right,0) + beam_path[beam]
+            else:
+                beam_path[next_beam] = beam_path.get(next_beam,0) + beam_path[beam]
+    return str(sum(beam_path[beam] for beam in beam_path.keys() if beam.row == height-1))
+            
 
 if __name__ == "__main__":
     from pathlib import Path
