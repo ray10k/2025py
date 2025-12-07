@@ -1,20 +1,55 @@
 from dataclasses import dataclass;
 
-@dataclass
-class InputItem:
-    """Representation of one 'unit' of input-data. May represent as little
-    as a single character from input, as much as the entire file, or anywhere
-    inbetween."""
-    a: str
+@dataclass(frozen=True, slots=True)
+class Splitter:
+    """One splitter's position."""
+    row:int
+    column:int
+    
+    def down(self) -> "Splitter":
+        return Splitter(self.row + 1, self.column)
+    
+    def sides(self) -> tuple["Splitter","Splitter"]:
+        return Splitter(self.row,self.column-1),Splitter(self.row,self.column+1)
+    
+    def __str__(self) -> str:
+        return f"({self.column},{self.row})"
 
-IType = list[InputItem]
-"""The "full" input-data. One input.txt file should parse into one IType"""
+IType = tuple[int,set[Splitter],int]
+"""All the relevant data from the input file. In order of appearance: column
+of the starting point (always on row 0), collection of all splitter-positions, height of the map."""
 
 def parse_input(input_content:str) -> IType:
-    return list()
+    lines = input_content.splitlines()
+    starting_column = lines[0].index("S")
+    splitters = set()
+    for y, row in enumerate(lines):
+        for x, char in enumerate(row):
+            if char == "^":
+                splitters.add(Splitter(y,x))
+    return starting_column, splitters, len(lines)
+
+def render_map(start:int, splits:set[Splitter], beams:set[Splitter]):
+    pass
 
 def star_one(data:IType) -> str:
-    pass
+    beams = set()
+    beams.add(Splitter(0,data[0]))
+    splitters = data[1]
+    retval = set()
+    
+    for y in range(data[2]-1):
+        # Changing the collection while filtering is an error, so pre-filter
+        # and save the result.
+        relevant_beams = list(filter(lambda b: b.row == y, beams))
+        for current_beam in relevant_beams:
+            next_beam = current_beam.down()
+            if next_beam in splitters:
+                beams.update(next_beam.sides())
+                retval.add(next_beam)
+            else:
+                beams.add(next_beam)
+    return str(len(retval))
 
 def star_two(data:IType) -> str:
     pass
