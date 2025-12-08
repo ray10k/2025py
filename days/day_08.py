@@ -67,7 +67,42 @@ def star_one(data:IType) -> str:
     return str(retval)
 
 def star_two(data:IType) -> str:
-    pass
+    #copied from star 1, since the start is the same.
+    distance_cache:dict[tuple[Position,Position],float] = dict()
+    for first,second in combinations(data,2): # 499500 operations; should be OK?
+        key = min(first,second),max(first,second)
+        value = first.distance(second)
+        distance_cache[key] = value
+    nearest_pairs = sorted(distance_cache.keys(),key=lambda pair: distance_cache[pair],reverse=True)
+    
+    circuits:list[set[Position]] = list()
+    retval = 0
+    while retval == 0 or max(len(circ) for circ in circuits) < len(data):
+        left, right = nearest_pairs.pop()
+        retval = left.x * right.x
+        l_circ = None
+        r_circ = None
+        for circuit in circuits:
+            if left in circuit:
+                l_circ = circuit
+            if right in circuit:
+                r_circ = circuit
+        if l_circ is not None and r_circ is not None and l_circ != r_circ:
+            #Merge the circuits. Both nodes are already included anyway.
+            circuits.remove(l_circ)
+            circuits.remove(r_circ)
+            new_circuit = l_circ.union(r_circ)
+            circuits.append(new_circuit)
+        elif l_circ is not None:
+            #Add the new node to the existing circuit.
+            l_circ.add(right)
+        elif r_circ is not None:
+            r_circ.add(left)
+        else:
+            #Create a new circuit.
+            circuits.append(set([left,right]))
+
+    return str(retval)
 
 if __name__ == "__main__":
     from pathlib import Path
