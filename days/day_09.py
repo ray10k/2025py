@@ -1,20 +1,49 @@
 from dataclasses import dataclass;
 
-@dataclass
-class InputItem:
-    """Representation of one 'unit' of input-data. May represent as little
-    as a single character from input, as much as the entire file, or anywhere
-    inbetween."""
-    a: str
+@dataclass(frozen=True,slots=True)
+class Coordinate:
+    """Location of a single red tile."""
+    column:int
+    row:int
 
-IType = list[InputItem]
+IType = list[Coordinate]
 """The "full" input-data. One input.txt file should parse into one IType"""
 
 def parse_input(input_content:str) -> IType:
-    return list()
+    retval = list()
+    for red_tile in input_content.strip().splitlines():
+        x,y = red_tile.split(",")
+        retval.append(Coordinate(int(x),int(y)))
+    return retval
 
 def star_one(data:IType) -> str:
-    pass
+    top = min(data,key=lambda x: x.row).row
+    bottom = max(data,key=lambda x: x.row).row
+    left = min(data,key=lambda y: y.column).column
+    right = max(data,key=lambda y:y.column).column
+    hsplit = left + (right-left) // 2
+    vsplit = top + (bottom-top) // 2
+
+    quadrants:dict[tuple[bool,bool],list[Coordinate]] = {(True,True):list(),(True,False):list(),(False,True):list(),(False,False):list()}
+    for tile in data:
+        h = tile.column >= hsplit
+        v = tile.row >= vsplit
+        quadrants[(h,v)].append(tile)
+    
+    retval = 0
+    #top-left / bottom-right first.
+    for topleft in quadrants[(False,False)]:
+        for bottomright in quadrants[(True,True)]:
+            delta_x = (bottomright.column - topleft.column) +1
+            delta_y = (bottomright.row - topleft.row) +1
+            retval = max(retval,delta_x*delta_y)
+    #top-right / bottom-left next.
+    for topright in quadrants[(True,False)]:
+        for bottomleft in quadrants[(False,True)]:
+            delta_x = (topright.column - bottomleft.column) +1
+            delta_y = (bottomleft.row - topright.row) +1
+            retval = max(retval, delta_x * delta_y)
+    return str(retval)
 
 def star_two(data:IType) -> str:
     pass
